@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SeriaLib</title>
+
+<style>
+:root {
+    --bg: #0f0f1a;
+    --panel: #141422;
+    --panel-2: #1c1c2b;
+    --text: #eeeeee;
+    --muted: #b8b8c9;
+    --border: #2a2a3d;
+    --accent: #4a4aff;
+    --accent-text: #ffffff;
+    --hover: rgba(120, 120, 255, 0.15);
+    --danger: #ff8a8a;
+}
+
+body.light {
+    --bg: #f4f4f4;
+    --panel: #ffffff;
+    --panel-2: #f0f0f0;
+    --text: #111111;
+    --muted: #5f6272;
+    --border: #dddddd;
+    --accent: #6c63ff;
+    --accent-text: #ffffff;
+    --hover: rgba(0, 0, 0, 0.06);
+    --danger: #b13535;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+}
+
+header {
+    height: 60px;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+	
+header h1 {
+    margin: 0;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.copyright {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+#home {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    padding: 30px;
+    animation: fadeIn 0.4s ease;
+}
+
+.card {
+    width: 220px;
+    background: var(--panel-2);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.18);
+}
+
+.card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+}
+
+.card-copy {
+    padding: 14px;
+}
+
+.card-copy h3 {
+    margin: 0 0 6px;
+}
+
+.card-copy p {
+    margin: 0;
+    color: var(--muted);
+}
+
+#reader {
+    display: none;
+    height: calc(100vh - 60px);
+    animation: fadeIn 0.3s ease;
+}
+
+.column {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#left {
+    width: 22%;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+}
+
+#middle {
+    width: 56%;
+}
+
+#right {
+    width: 22%;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+}
+
+.sidebar-cover {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.season-header {
+    cursor: pointer;
+    padding: 10px;
+    background: var(--panel-2);
+    border-radius: 6px;
+    margin-top: 8px;
+    border: 1px solid var(--border);
+}
+
+.episodes {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.episodes.open {
+    max-height: 500px;
+}
+
+.episode {
+    padding: 8px;
+    margin-top: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.episode:hover {
+    background: var(--hover);
+}
+
+.episode.active {
+    background: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+}
+
+.content {
+    animation: slideFade 0.3s ease;
+}
+
+.meta {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+.episode-body {
+    line-height: 1.7;
+    white-space: pre-wrap;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.status {
+    margin: 16px 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--muted);
+}
+
+.status.error {
+    color: var(--danger);
+}
+
+button {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+}
+
+button:hover {
+    background: var(--hover);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+.nav-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.reading-mode #left,
+.reading-mode #right {
+    display: none;
+}
+
+.reading-mode #middle {
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    #reader {
+        flex-direction: column;
+        height: auto;
+    }
+
+    #left,
+    #middle,
+    #right {
+        width: 100%;
+        border: none;
+    }
+
+    #middle {
+        min-height: calc(100vh - 60px);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideFade {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1 onclick="goHome()">SeriaLib — 1.0</h1>
+
+    <div class="header-right">
+        <span class="copyright">Sloan Ackers © 2026</span>
+        <button onclick="toggleReading()" aria-label="Toggle reading mode">📖</button>
+        <button onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+    </div>
+</header>
+
+
+<div id="home"></div>
+
+<div id="reader">
+    <div id="left" class="column"></div>
+    <div id="middle" class="column"></div>
+    <div id="right" class="column"></div>
+</div>
+
+<script>
+const serials = [
+    {
+        title: "Karma — Full Series",
+        cover: "https://media.discordapp.net/attachments/1494044652167499806/1496312873079541860/Karma_3.png?ex=69e96d75&is=69e81bf5&hm=8a42bf0a32858c7d5f8f1cd416a0209552c8d3387b7c9a856a3851da0d8081f6&=&format=webp&quality=lossless&width=566&height=903",
+        description: "Time travel chaos.",
+        seasons: [
+            {
+                name: "Season 1",
+                episodes: [
+                    { title: "Ep 1", file: "Storing/Karma/Season1/e1.txt" },
+                    { title: "Ep 2", file: "Storing/Karma/Season1/e2.txt" }
+                ]
+            }
+        ]
+    }
+];
+
+let current = { s: 0, season: 0, ep: 0 };
+
+const home = document.getElementById("home");
+const reader = document.getElementById("reader");
+const middle = document.getElementById("middle");
+const left = document.getElementById("left");
+const right = document.getElementById("right");
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    }[char]));
+}
+
+function normalizePath(path) {
+    return String(path).replace(/\\/g, "/");
+}
+
+function getEpisodeData(s, season, ep) {
+    return serials[s]?.seasons?.[season]?.episodes?.[ep] ?? null;
+}
+
+function renderHome() {
+    home.innerHTML = "";
+
+    serials.forEach((serial, i) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <img src="${serial.cover}" alt="${escapeHtml(serial.title)} cover">
+            <div class="card-copy">
+                <h3>${escapeHtml(serial.title)}</h3>
+                <p>${escapeHtml(serial.description)}</p>
+            </div>
+        `;
+        card.onclick = () => openSerial(i);
+        home.appendChild(card);
+    });
+}
+
+function openSerial(i) {
+    home.style.display = "none";
+    reader.style.display = "flex";
+
+    const serial = serials[i];
+
+    left.innerHTML = `
+        <img class="sidebar-cover" src="${serial.cover}" alt="${escapeHtml(serial.title)} cover">
+        <h2>${escapeHtml(serial.title)}</h2>
+        <p>${escapeHtml(serial.description)}</p>
+    `;
+
+    buildRight(i);
+
+    let saved = null;
+    try {
+        saved = JSON.parse(localStorage.getItem("lastRead"));
+    } catch (error) {
+        saved = null;
+    }
+
+    if (saved && saved.s === i && getEpisodeData(saved.s, saved.season, saved.ep)) {
+        loadEpisode(saved.s, saved.season, saved.ep);
+    } else {
+        loadEpisode(i, 0, 0);
+    }
+}
+
+function buildRight(i) {
+    let html = "";
+
+    serials[i].seasons.forEach((season, seasonIndex) => {
+        html += `
+            <div>
+                <div class="season-header" onclick="toggleSeason(this, ${i}, ${seasonIndex})">
+                    ${escapeHtml(season.name)}
+                </div>
+                <div class="episodes">
+                    ${season.episodes.map((ep, episodeIndex) => `
+                        <div
+                            class="episode"
+                            id="ep-${i}-${seasonIndex}-${episodeIndex}"
+                            onclick="loadEpisode(${i}, ${seasonIndex}, ${episodeIndex})">
+                            ${escapeHtml(ep.title)}
+                        </div>
+                    `).join("")}
+                </div>
+            </div>
+        `;
+    });
+
+    right.innerHTML = html;
+}
+
+function toggleSeason(el, i, seasonIndex) {
+    const list = el.nextElementSibling;
+    const willOpen = !list.classList.contains("open");
+
+    document.querySelectorAll(".episodes").forEach((episodesEl) => {
+        episodesEl.classList.remove("open");
+    });
+
+    if (willOpen) {
+        list.classList.add("open");
+    }
+
+    if (willOpen && current.s !== i) {
+        loadEpisode(i, seasonIndex, 0);
+    }
+}
+
+async function readEpisodeFile(path) {
+    const normalized = normalizePath(path);
+    const response = await fetch(normalized);
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} while loading ${normalized}`);
+    }
+
+    return response.text();
+}
+
+async function loadEpisode(s, season, ep) {
+    const data = getEpisodeData(s, season, ep);
+    if (!data) {
+        return;
+    }
+
+    current = { s, season, ep };
+
+    middle.innerHTML = `
+        <div class="content">
+            <h1>${escapeHtml(data.title)}</h1>
+            <div class="status">Loading episode...</div>
+        </div>
+    `;
+
+    highlight();
+    openSeason(season);
+    localStorage.setItem("lastRead", JSON.stringify(current));
+
+    try {
+        const content = await readEpisodeFile(data.file);
+
+        middle.innerHTML = `
+            <div class="content">
+                <h1>${escapeHtml(data.title)}</h1>
+                <div class="episode-body">${escapeHtml(content)}</div>
+                <div class="nav-buttons">
+                    <button onclick="prevEp()">← Prev</button>
+                    <button onclick="nextEp()">Next →</button>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        middle.innerHTML = `
+            <div class="content">
+                <h1>${escapeHtml(data.title)}</h1>
+                <div class="status error">
+                    Could not load this episode file.<br><br>
+                    Make sure the text file exists relative to this HTML file, and if you're opening the page with <code>file://</code>, run it through a local server because browsers often block local <code>fetch()</code> requests.
+                </div>
+                <div class="nav-buttons">
+                    <button onclick="prevEp()">← Prev</button>
+                    <button onclick="nextEp()">Next →</button>
+                </div>
+            </div>
+        `;
+
+        console.error("Episode load failed:", error);
+    }
+}
+
+function highlight() {
+    document.querySelectorAll(".episode").forEach((episodeEl) => {
+        episodeEl.classList.remove("active");
+    });
+
+    const el = document.getElementById(`ep-${current.s}-${current.season}-${current.ep}`);
+    if (el) {
+        el.classList.add("active");
+    }
+}
+
+function openSeason(season) {
+    document.querySelectorAll(".episodes").forEach((episodesEl) => {
+        episodesEl.classList.remove("open");
+    });
+
+    const el = document.querySelectorAll(".episodes")[season];
+    if (el) {
+        el.classList.add("open");
+    }
+}
+
+function nextEp() {
+    const { s, season, ep } = current;
+    const episodes = serials[s].seasons[season].episodes;
+    if (ep < episodes.length - 1) {
+        loadEpisode(s, season, ep + 1);
+    }
+}
+
+function prevEp() {
+    const { s, season, ep } = current;
+    if (ep > 0) {
+        loadEpisode(s, season, ep - 1);
+    }
+}
+
+function toggleTheme() {
+    document.body.classList.toggle("light");
+}
+
+function toggleReading() {
+    document.body.classList.toggle("reading-mode");
+}
+
+function goHome() {
+    reader.style.display = "none";
+    home.style.display = "flex";
+}
+
+document.addEventListener("keydown", (e) => {
+    const inReader = reader.style.display === "flex";
+
+    if (e.key.toLowerCase() === "t") {
+        toggleTheme();
+        return;
+    }
+
+    if (!inReader) {
+        return;
+    }
+
+    if (e.key === "ArrowRight") {
+        nextEp();
+    } else if (e.key === "ArrowLeft") {
+        prevEp();
+    } else if (e.key.toLowerCase() === "f") {
+        toggleReading();
+    } else if (e.key === "Escape") {
+        goHome();
+    }
+});
+
+renderHome();
+</script>
+	
+</body>
+</html>
